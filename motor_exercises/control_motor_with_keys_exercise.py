@@ -5,47 +5,49 @@ from __future__ import division
 from builtins import input
 
 import time
-import utils as utils
 
 # the above lines are meant for Python3 compatibility.
 # they force the use of Python3 functionality for print(),
 # the integer division and input()
 # mind your parentheses!
 
-from BrickPi import *   #import BrickPi.py file to use BrickPi operations
-
-BrickPiSetup()  # setup the serial port for communication
-
-BrickPi.MotorEnable[PORT_A] = 1 #Enable the Motor A
-BrickPi.MotorEnable[PORT_B] = 1 #Enable the Motor B
-
-BrickPiSetupSensors() #Send the properties of sensors to BrickPi
+import sys
+sys.path.append("/home/zoe/Teaching/")
 
 
-#Communication timeout in ms (how long since last valid communication before floating the motors).
-#0 disables the timeout so the motor would keep running even if it is not communicating with the RaspberryPi
-BrickPi.Timeout=3000
-print("BrickPiSetTimeout Status :",BrickPiSetTimeout())
+from Tutoring.BrickPi3.Software.Python import brickpi3 as bp
+
+BP = bp.BrickPi3()
+
+right_motor_power = 20
+left_motor_power = 20
+right_motor = BP.PORT_C
+left_motor = BP.PORT_A
+
+try:
+    while True:
+
+        a = input()
+
+        if a == "G" or "g":
+            BP.set_motor_power(right_motor, right_motor_power)
+            BP.set_motor_power(left_motor, left_motor_power)
+            print("Moving forward at speed ", right_motor_power)
+            a = "I" #i for idle, don't do anything but wait for next input
+
+        if a == "S" or "s":
+            BP.set_motor_power(right_motor, 0)
+            BP.set_motor_power(left_motor, 0)
+            print("Stopped")
+            a = "I"  # i for idle, don't do anything but wait for next input
+
+        time.sleep(0.02)  # delay for 0.02 seconds (20ms) to reduce the Raspberry Pi CPU load.
+
+except KeyboardInterrupt:  # except the program gets interrupted by Ctrl+C on the keyboard.
+    BP.reset_all()  # Unconfigure the sensors, disable the motors, and restore the LED to the control of the BrickPi3 firmware.
 
 
 
-def control_motor_with_keys(port_input, speed=50):
-
-    # get the port using getPort in utils
-
-
-    # get user input to start motor
-
-
-    # start motor at speed 'speed'
-
-
-    # get user input to start motor
-
-
-    #stop motor
-    
 
 
 
-if __name__ == "__main__":
