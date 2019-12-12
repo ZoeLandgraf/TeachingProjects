@@ -384,19 +384,6 @@ def main_menu(win):
     pygame.quit()
 
 
-def main_menu_test(win):
-
-    while True:
-        win.fill((255, 0, 0))
-
-        pygame.display.update()
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                # run = False
-                break;
-
-    pygame.quit()
-
 win = pygame.display.set_mode((s_width, s_height))
 pygame.display.init()
 pygame.display.set_caption('Tetris')
