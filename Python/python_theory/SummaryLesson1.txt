@@ -1,0 +1,32 @@
+Summary of Lesson 1:
+
+1) First, we learnt about the printing function: 
+
+    print()
+
+The printing function can be used to communicate something from the program state or content to you, the programmer, or, the user.
+
+You can use the printing function to print a message as follows:
+
+print("Hello, my name is Lisa")
+
+What we are passing to the printing function, is a sentence deliminated using quotes. This is important, because anything which is not deliminated by quotes and is not a number, will be interpreted by python as a Variable or an Object.
+
+
+2) Second, we learnt about different types in python:
+
+    integers (any number without decimals)
+    floats (decimal numbers)
+    strings (words or sentences such as "hello")
+    character (single letter or sign 'c')
+    boolean (1 or 0, which is equivalent to True or False)
+    
+    
+A neat way to find out the type of something in python is to use the function type()
+
+    type(3) (This will return the type integer)
+
+
+3) For loops and while loops
+    
+4) We started introducing the concept of a function. You already know two functions (print() and type()). Functions are one of the    core concepts of any programming language. 
