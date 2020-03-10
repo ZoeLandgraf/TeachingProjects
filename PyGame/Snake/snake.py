@@ -136,7 +136,7 @@ class GameSurface:
         # control variable to start and stop the game
         self._running = True
 
-        self.delay = 1
+        self.delay = 0
 
 
     def check_for_quit(self):
