@@ -1,29 +1,29 @@
 from pygame.locals import *
 import pygame
-
+import numpy as np
 
 class Snake:
 
     def __init__(self,
                  screen_width,
                  screen_height,
-                 initial_position_x=10,
-                 initial_position_y=10):
+                 initial_position_x=30,
+                 initial_position_y=30):
 
         self.body_x = []
         self.body_y = []
+        self.piece_size = 30
 
         self.log = False
 
         self.length = 3
 
         self.colour = (255, 0, 0)
-        self.surface = pygame.Surface([10, 10])
+        self.surface = pygame.Surface([self.piece_size, self.piece_size])
         self.surface.fill((255, 0, 0))
 
         # add direction member variable (we encode directions as numbers 0-3, 0 being right)
         self.direction = 0
-        self.piece_size = 10
 
         self.setup_snake(initial_position_x, initial_position_y)
 
@@ -83,8 +83,27 @@ class Snake:
         self.body_x[0] = self.snake_head_x
         self.body_y[0] = self.snake_head_y
 
+    def extend_snake(self):
+
+        self.length += 1
+
+        new_snake_x = np.zeros(self.length)
+        new_snake_y = np.zeros(self.length)
+
+        self.move(update_position=False)
+
+        new_snake_x[0]=self.snake_head_x
+        new_snake_y[0]=self.snake_head_y
+
+        new_snake_x[1:] = self.body_x
+        new_snake_y[1:] = self.body_y
+
+        self.body_x = list(new_snake_x)
+        self.body_y = list(new_snake_y)
+
+
     # The move function, which moves the snake depending on the direction that it currently has
-    def move(self):
+    def move(self, update_position=True):
         if self.direction == 0:
             self.moveRight()
         elif self.direction == 1:
@@ -94,7 +113,8 @@ class Snake:
         elif self.direction == 3:
             self.moveUp()
 
-        self.update_snake_position()
+        if update_position:
+            self.update_snake_position()
 
     def moveRight(self):
         self.snake_head_x = self.snake_head_x + self.piece_size
@@ -116,17 +136,57 @@ class Snake:
         return [(el[0], el[1]) for el in zip(self.body_x, self.body_y)]
 
 
+class Apple:
+    def __init__(self,
+                 windowwidth, windowheight):
+
+        self.surface = pygame.Surface([30, 30])
+        self.surface.fill((44, 135, 60))
+        self.posx = np.random.choice(range(0, windowwidth, 30))
+        self.posy = np.random.choice(range(0, windowheight, 30))
+        self.windowwidth = windowwidth
+        self.windowheight = windowheight
+
+    def get_position(self):
+        return (self.posx, self.posy)
+
+    def generate_position(self):
+        self.posx = np.random.choice(range(0, self.windowwidth, 30))
+        self.posy = np.random.choice(range(0, self.windowheight, 30))
+
+
+def drawGrid(w, rows, surface):
+    sizeBtwn = w // rows
+
+    x = 0
+    y = 0
+    for l in range(rows):
+        x = x + sizeBtwn
+        y = y + sizeBtwn
+
+        pygame.draw.line(surface, (255, 255, 255), (x, 0), (x, w))
+        pygame.draw.line(surface, (255, 255, 255), (0, y), (w, y))
+
+
 class GameSurface:
 
-    def __init__(self
-                 ):
+    def __init__(self):
 
         # display width and height
-        self.windowWidth = 800
+        self.windowWidth = 600
         self.windowHeight = 600
 
         # snake
         self.snake = Snake(self.windowWidth, self.windowHeight)
+
+        # apple
+        self.apple = Apple(windowwidth=self.windowWidth, windowheight=self.windowHeight)
+
+        # player lives
+        self.lives = 3
+
+        # allows the player to leave the outside of the game if he still has some lives
+        self.grace_period = 0
 
         # appearance
         self._display_surf = pygame.display.set_mode((self.windowWidth, self.windowHeight), pygame.HWSURFACE)
@@ -136,7 +196,7 @@ class GameSurface:
         # control variable to start and stop the game
         self._running = True
 
-        self.delay = 0
+        self.clock = pygame.time.Clock()
 
 
     def check_for_quit(self):
@@ -144,18 +204,34 @@ class GameSurface:
             if event.type == pygame.QUIT:
                 self._running = False
 
+    def check_for_loss(self):
+        out_of_limits_max = self.snake.snake_head_x > self.windowWidth or self.snake.snake_head_y > self.windowHeight
+        out_of_limits_min = self.snake.snake_head_x < 0 or self.snake.snake_head_y < 0
+
+        if (out_of_limits_max is True) or (out_of_limits_min is True):
+           return True
+
+        if (self.snake.snake_head_x in self.snake.body_x is True) or (self.snake.snake_head_y in self.snake.body_x is True):
+           return True
+
+        return False
+
     def render(self):
         self._display_surf.fill((0, 0, 0))
         # view snake
         snake_appearance = self.snake.appearance()
         snake_location = self.snake.location()
+        apple_appearance = self.apple.surface
+        apple_location = self.apple.get_position()
 
         # draw every segment in the snake body onto the gaming screen
         for el in snake_location:
             self._display_surf.blit(snake_appearance, el)
-
+        self._display_surf.blit(apple_appearance, apple_location)
         # updates the display
+        drawGrid(600, 20, self._display_surf)
         pygame.display.flip()
+
 
     def cleanup(self):
         pygame.display.quit()
@@ -168,6 +244,11 @@ class GameSurface:
 
             # always move the snake. As the initial direction is set to 0, the snake
             # will always start moving right.
+
+            if (self.apple.posx == self.snake.snake_head_x) and (self.apple.posy == self.snake.snake_head_y):
+                self.apple.generate_position()
+                self.snake.extend_snake()
+
             self.snake.move()
 
             # instead of moving the snake with the arrowkeys, we now set its direction
@@ -183,10 +264,30 @@ class GameSurface:
             if (keys[K_DOWN]):
                 self.snake.update_direction(1)
 
+            if self.grace_period > 0:
+                self.grace_period -= 1
+            else:
+                if self.check_for_loss() == True:
+                    if self.lives == 0:
+                        self._running = False
+                    else:
+                        self.grace_period = 15
+                        self.lives -= 1
+
+
             self.check_for_quit()
             self.render()
 
-            pygame.time.delay(self.delay)
+            self.clock.tick(10)
+
+
+        self._display_surf.fill((225, 30, 0))
+        font = pygame.font.Font(None, 60)
+        text = font.render("You lost", 1, (0, 0, 0))
+        self._display_surf.blit(text, (230, 250))
+        pygame.display.update()
+        pygame.time.delay(3000)
+        self.clock.tick(10)
 
         self.cleanup()
 
