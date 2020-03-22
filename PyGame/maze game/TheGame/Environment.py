@@ -74,3 +74,4 @@ class Environment:
         self.labyrinth.render(self.display_surf)
 
         pygame.display.update()
+

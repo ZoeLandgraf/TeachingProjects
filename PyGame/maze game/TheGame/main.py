@@ -1,13 +1,13 @@
 import pygame
 
-from Environment import Environment
+from Environment import Environment as E
+import Environment
 
 def main():
 
-
     pygame.init()
 
-    env = Environment()
+    env = E()
 
     running = True
     clock = pygame.time.Clock()
@@ -28,4 +28,6 @@ def main():
     pygame.quit()
 
 
-main()
+
+if __name__ == "__main__":
+    main()
