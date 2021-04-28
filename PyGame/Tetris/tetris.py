@@ -344,7 +344,6 @@ def main():
 
         # IF PIECE HIT GROUND
         if change_piece:
-            print("changing piece")
             for pos in shape_pos:
                 p = (pos[0], pos[1])
                 locked_positions[p] = current_piece.color
