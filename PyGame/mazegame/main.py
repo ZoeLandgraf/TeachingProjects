@@ -3,79 +3,54 @@ import pygame
 from environment import Environment
 from pygame.locals import *
 from maze import Maze
+from Button import Button
 
+def game_intro():
+    intro = True
+    clock = pygame.time.Clock()
+    height = 100
+    width = 200
+    xpos = 640/2 - width/2
+    ypos = 480/2 - height/2
+    display = pygame.display.set_mode((640, 480), pygame.RESIZABLE)
+    gamequit = False
 
-class Button:
-    def __init__(self, rect):
-        self.rect = pygame.Rect(rect)
-        self.image = pygame.Surface(self.rect.size).convert()
-        self.color = (0,150,0)
-        self.color_hovering = (0,255,0)
-
-
-        self.font = pygame.font.SysFont('Arial', 40)
-        self.font_color = pygame.Color('white')
-        self.text = self.text = self.font.render("Start Game",True,self.font_color)
-        self.text_rect = self.text.get_rect(center=self.rect.center)
-
-    def get_event(self, event):
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            return self.on_click(event)
-        return False
-
-    def is_hovering(self):
-        if self.rect.collidepoint(pygame.mouse.get_pos()):
-            return True
-
-    def on_click(self, event):
-        if self.rect.collidepoint(event.pos):
-            return True
-        return False
-
-    def draw(self, surf):
-        if self.is_hovering():
-            self.image.fill(self.color_hovering)
-        else:
-            self.image.fill(self.color)
-        surf.blit(self.image, self.rect)
-        surf.blit(self.text, self.text_rect)
-
-
-def run_start_screen(width, height):
-    screen = pygame.display.set_mode((width, height))
-    done = False
-    button_width = 200
-    button_height = 100
-    btn = Button(rect=((width / 2) - button_width / 2 ,
-                       (height / 2) - button_height / 2,
-                       button_width, button_height))
-    play_game = True
-    while not done:
+    button = Button((xpos, ypos, width, height))
+    while intro:
+        display.fill((0,0,0))
+        button.render(display)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                play_game = False
-                done = True
+                intro = False
+                gamequit = True
+            if button.mouse_clicked(event):
+                intro = False
 
-            if btn.get_event(event):
-                done = True
-
-        btn.draw(screen)
         pygame.display.update()
-
-    return play_game
-
-
-def game_loop():
-
-    env = Environment()
+        clock.tick(15)
+    return gamequit
+def maze_game():
+    play = True
+    theme_song = pygame.mixer.Sound(
+        '/Users/zoelandgraf/Tutoring/PyGame/maz_game_final/mazegame/Images/SLOWER-TEMPO2019-12-09_-_Retro_Forest_-_David_Fesliyan.wav')
+    counter = 0
+    display = True
     clock = pygame.time.Clock()
     run = True
+    env = Environment()
 
-    while run == True:
+    while run:
+        if play:
+            # pygame.mixer.music.load('/Users/michaelquintin/Desktop/All/programming/ProgrammingZoe/mazegame/Images/SLOWER-TEMPO2019-12-09_-_Retro_Forest_-_David_Fesliyan.wav')
+            # pygame.mixer.music.play(-1)
+            pygame.mixer.Sound.play(theme_song)
+            play = False
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
+
+        #print (grace_period_counter)
 
         keys = pygame.key.get_pressed()
 
@@ -90,41 +65,60 @@ def game_loop():
 
         if keys[K_LEFT] and keys[K_UP]:
             continue
+        if display:
 
+            if (keys[K_RIGHT]):
+                env.player.update_position(0)
+                env.stalker.update_player_position((env.player.posx, env.player.posy))
 
-        if (keys[K_RIGHT]):
-            env.player.update_position(0)
-            env.stalker.update_player_position((env.player.posx, env.player.posy))
+            if (keys[K_LEFT]):
+                env.player.update_position(2)
+                env.stalker.update_player_position((env.player.posx, env.player.posy))
 
-        if (keys[K_LEFT]):
-            env.player.update_position(2)
-            env.stalker.update_player_position((env.player.posx, env.player.posy))
+            if (keys[K_UP]):
+                env.player.update_position(3)
+                env.stalker.update_player_position((env.player.posx, env.player.posy))
 
-        if (keys[K_UP]):
-            env.player.update_position(3)
-            env.stalker.update_player_position((env.player.posx, env.player.posy))
-
-        if (keys[K_DOWN]):
-            env.player.update_position(1)
-            env.stalker.update_player_position((env.player.posx, env.player.posy))
+            if (keys[K_DOWN]):
+                env.player.update_position(1)
+                env.stalker.update_player_position((env.player.posx, env.player.posy))
 
         if env.exit_program() == True:
             run = False
-        env.render()
+
+        if env.finished_maze:
+            env.display_winning_screen(env._display_surf)
+            counter+=1
+            display = False
+        elif env.player.lives > 0:
+            env.render()
+            env.activity()
+        else:
+            env.display_losing_screen(env._display_surf)
+            counter += 1
+            display = False
+
+
         clock.tick(10)
+
+        if counter == 50:
+            break
+    pygame.mixer.pause()
 
 
 def main():
     pygame.init()
 
+
     while True:
-
-        play = run_start_screen(640, 480)
-
-        if not play:
+        quitgame = game_intro()
+        if quitgame:
             break
-        else:
-            game_loop()
+        maze_game()
+
+
+    pygame.display.quit()
+    pygame.quit()
 
 
 

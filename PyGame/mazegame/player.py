@@ -2,11 +2,7 @@ import pygame
 import random
 from random import randint
 import time
-# h o m e w o r k   f o r   J u n e   17 ,   2 0 2 0
-# add a range for the finish line. (<= >=)
-# finish the winning (and losing) screen
-# add other enemies
-#
+# h o m e w o r k
 
 class Player:
 
@@ -19,7 +15,7 @@ class Player:
         self.lives = 30
         self.score = 0
         self.grace_period = False
-        self.player = pygame.image.load('/Users/zoelandgraf/Tutoring/PyGame/mazegame/Images/340220dd000a8af.png')
+        self.player = pygame.image.load('/Users/zoelandgraf/Tutoring/PyGame/maz_game_final/mazegame/Images/340220dd000a8af.png')
         self.player = pygame.transform.scale(self.player,(30,30))
         self.last_movement = 0
 
