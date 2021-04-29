@@ -1,4 +1,4 @@
-# RoboticsTutoring
-Code snippets for Sensor functionality on the Raspberry Pi + Brickpi ////
+## Projects completed in the context of teaching python, machine learning and robotics
+
 
 
